@@ -119,37 +119,184 @@ All features verified with automated Playwright tests (9/9 passed).
         └── docker-push.yml      # Auto-push backend image to Docker Hub
 ```
 
-## API Endpoints
+## API Endpoints & Examples
+
+> Base URL: `https://inventory-management-faga.onrender.com`
 
 ### Products
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/products/` | Create a new product |
-| GET | `/products/` | List all products |
-| GET | `/products/{id}` | Get product by ID |
-| PUT | `/products/{id}` | Update product |
-| DELETE | `/products/{id}` | Delete product |
+
+**Create a product**
+```bash
+curl -X POST /products/ -H "Content-Type: application/json" -d '{
+  "name": "MacBook Pro 14\"",
+  "sku": "MBP-14-M3",
+  "price": 1999.99,
+  "quantity_in_stock": 24
+}'
+```
+```json
+{
+  "id": 1,
+  "name": "MacBook Pro 14\"",
+  "sku": "MBP-14-M3",
+  "price": 1999.99,
+  "quantity_in_stock": 24
+}
+```
+
+**List all products**
+```bash
+curl /products/
+```
+```json
+[
+  {
+    "id": 1,
+    "name": "MacBook Pro 14\"",
+    "sku": "MBP-14-M3",
+    "price": 1999.99,
+    "quantity_in_stock": 24
+  }
+]
+```
+
+**Get product by ID**
+```bash
+curl /products/1
+```
+
+**Update a product**
+```bash
+curl -X PUT /products/1 -H "Content-Type: application/json" -d '{
+  "price": 1899.99,
+  "quantity_in_stock": 30
+}'
+```
+```json
+{
+  "id": 1,
+  "name": "MacBook Pro 14\"",
+  "sku": "MBP-14-M3",
+  "price": 1899.99,
+  "quantity_in_stock": 30
+}
+```
+
+**Delete a product**
+```bash
+curl -X DELETE /products/1
+# 204 No Content
+```
 
 ### Customers
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/customers/` | Create a new customer |
-| GET | `/customers/` | List all customers |
-| GET | `/customers/{id}` | Get customer by ID |
-| DELETE | `/customers/{id}` | Delete customer |
+
+**Create a customer**
+```bash
+curl -X POST /customers/ -H "Content-Type: application/json" -d '{
+  "full_name": "Arjun Mehta",
+  "email": "arjun.mehta@outlook.com",
+  "phone": "+91 98765 43210"
+}'
+```
+```json
+{
+  "id": 1,
+  "full_name": "Arjun Mehta",
+  "email": "arjun.mehta@outlook.com",
+  "phone": "+91 98765 43210"
+}
+```
+
+**List all customers**
+```bash
+curl /customers/
+```
+
+**Get customer by ID**
+```bash
+curl /customers/1
+```
+
+**Delete a customer**
+```bash
+curl -X DELETE /customers/1
+# 204 No Content
+```
 
 ### Orders
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/orders/` | Create a new order |
-| GET | `/orders/` | List all orders |
-| GET | `/orders/{id}` | Get order by ID |
-| DELETE | `/orders/{id}` | Delete order |
+
+**Create an order** (auto-calculates total, auto-deducts stock)
+```bash
+curl -X POST /orders/ -H "Content-Type: application/json" -d '{
+  "customer_id": 1,
+  "items": [
+    { "product_id": 1, "quantity": 1 },
+    { "product_id": 3, "quantity": 2 }
+  ]
+}'
+```
+```json
+{
+  "id": 1,
+  "customer_id": 1,
+  "total_amount": 2199.97,
+  "created_at": "2026-06-01T15:10:10.000Z",
+  "items": [
+    { "id": 1, "product_id": 1, "quantity": 1, "unit_price": 1999.99 },
+    { "id": 2, "product_id": 3, "quantity": 2, "unit_price": 99.99 }
+  ]
+}
+```
+
+**List all orders**
+```bash
+curl /orders/
+```
+
+**Get order by ID**
+```bash
+curl /orders/1
+```
+
+**Delete an order**
+```bash
+curl -X DELETE /orders/1
+# 204 No Content
+```
 
 ### Dashboard
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/dashboard` | Summary stats + low stock alerts |
+
+**Get summary stats**
+```bash
+curl /dashboard
+```
+```json
+{
+  "total_products": 10,
+  "total_customers": 6,
+  "total_orders": 5,
+  "low_stock_products": [
+    { "id": 6, "name": "Keychron K8 Pro", "sku": "KEY-K8PRO", "price": 109.0, "quantity_in_stock": 6 }
+  ]
+}
+```
+
+### Error Responses
+
+**Duplicate SKU (400)**
+```json
+{ "detail": "Product with this SKU already exists" }
+```
+
+**Insufficient stock (400)**
+```json
+{ "detail": "Insufficient stock for 'MacBook Pro 14\"'. Available: 2, Requested: 5" }
+```
+
+**Not found (404)**
+```json
+{ "detail": "Product not found" }
+```
 
 ## Business Logic
 

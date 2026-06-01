@@ -25,3 +25,12 @@ jobs:
           tags: |
             tejsvibhat/inventory-backend:latest
             tejsvibhat/inventory-backend:${{ github.sha }}
+
+      - name: Update Docker Hub description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: tejsvibhat/inventory-backend
+          readme-filepath: ./backend/DOCKERHUB.md
+          short-description: "FastAPI backend for StockFlow — Inventory & Order Management System"
