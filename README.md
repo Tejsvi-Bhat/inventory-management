@@ -40,6 +40,32 @@ Detailed view with customer info, line items, and subtotals.
 
 ![Order Details](docs/screenshots/order-details.png)
 
+## Feature Demos
+
+All features verified with automated Playwright tests (9/9 passed).
+
+### Product Management
+
+| Add Product | Edit Product | Delete Product |
+|:-----------:|:------------:|:--------------:|
+| ![Add Product](docs/screenshots/features/add-product.gif) | ![Edit Product](docs/screenshots/features/edit-product.gif) | ![Delete Product](docs/screenshots/features/delete-product.gif) |
+
+### Customer Management
+
+| Add Customer | Delete Customer |
+|:------------:|:---------------:|
+| ![Add Customer](docs/screenshots/features/add-customer.gif) | ![Delete Customer](docs/screenshots/features/delete-customer.gif) |
+
+### Order Management
+
+| Create Order | View Details | Delete Order |
+|:------------:|:------------:|:------------:|
+| ![Create Order](docs/screenshots/features/create-order.gif) | ![View Order](docs/screenshots/features/view-order-details.gif) | ![Delete Order](docs/screenshots/features/delete-order.gif) |
+
+### Dashboard
+
+![Dashboard](docs/screenshots/features/dashboard.gif)
+
 ## Tech Stack
 
 | Layer | Technology |
