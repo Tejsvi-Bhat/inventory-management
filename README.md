@@ -1,0 +1,247 @@
+# StockFlow — Inventory & Order Management System
+
+A full-stack inventory and order management system built with React, FastAPI, and PostgreSQL. Fully containerized with Docker and deployed on free hosting platforms.
+
+## Live Demo
+
+| Service | URL |
+|---------|-----|
+| Frontend | [inventory-management-one-kappa.vercel.app](https://inventory-management-one-kappa.vercel.app) |
+| Backend API | [inventory-management-faga.onrender.com](https://inventory-management-faga.onrender.com) |
+| API Docs | [inventory-management-faga.onrender.com/docs](https://inventory-management-faga.onrender.com/docs) |
+| Docker Hub | [hub.docker.com/r/tejsvibhat/inventory-backend](https://hub.docker.com/r/tejsvibhat/inventory-backend) |
+
+> **Note:** The Render free tier spins down after inactivity. The first request may take ~30 seconds to wake up.
+
+## Screenshots
+
+### Dashboard
+Overview with summary cards and low stock alerts.
+
+![Dashboard](docs/screenshots/dashboard.png)
+
+### Products
+Full CRUD with inline stock badges and SKU codes.
+
+![Products](docs/screenshots/products.png)
+
+### Customers
+Customer list with avatar initials and contact details.
+
+![Customers](docs/screenshots/customers.png)
+
+### Orders
+Order tracking with item counts and totals.
+
+![Orders](docs/screenshots/orders.png)
+
+### Order Details
+Detailed view with customer info, line items, and subtotals.
+
+![Order Details](docs/screenshots/order-details.png)
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 19 (Vite) |
+| Backend | Python 3.11 + FastAPI |
+| Database | PostgreSQL 16 |
+| ORM | SQLAlchemy 2.0 |
+| Validation | Pydantic v2 |
+| Containerization | Docker + Docker Compose |
+| CI/CD | GitHub Actions |
+| Frontend Hosting | Vercel |
+| Backend Hosting | Render |
+
+## Project Structure
+
+```
+├── backend/
+│   ├── app/
+│   │   ├── main.py              # FastAPI app, CORS, dashboard
+│   │   ├── database.py          # SQLAlchemy engine & session
+│   │   ├── models.py            # Product, Customer, Order, OrderItem
+│   │   ├── schemas.py           # Pydantic request/response models
+│   │   └── routers/
+│   │       ├── products.py      # Product CRUD
+│   │       ├── customers.py     # Customer CRUD
+│   │       └── orders.py        # Order CRUD + business logic
+│   ├── Dockerfile
+│   ├── .dockerignore
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   │   ├── App.jsx              # Router + sidebar navigation
+│   │   ├── App.css              # Global styles
+│   │   ├── pages/
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── Products.jsx
+│   │   │   ├── Customers.jsx
+│   │   │   ├── Orders.jsx
+│   │   │   └── OrderDetails.jsx
+│   │   └── services/
+│   │       └── api.js           # Axios API client
+│   ├── Dockerfile
+│   ├── nginx.conf
+│   ├── .dockerignore
+│   └── vercel.json
+├── docker-compose.yml
+├── .env.example
+└── .github/
+    └── workflows/
+        └── docker-push.yml      # Auto-push backend image to Docker Hub
+```
+
+## API Endpoints
+
+### Products
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/products/` | Create a new product |
+| GET | `/products/` | List all products |
+| GET | `/products/{id}` | Get product by ID |
+| PUT | `/products/{id}` | Update product |
+| DELETE | `/products/{id}` | Delete product |
+
+### Customers
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/customers/` | Create a new customer |
+| GET | `/customers/` | List all customers |
+| GET | `/customers/{id}` | Get customer by ID |
+| DELETE | `/customers/{id}` | Delete customer |
+
+### Orders
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/orders/` | Create a new order |
+| GET | `/orders/` | List all orders |
+| GET | `/orders/{id}` | Get order by ID |
+| DELETE | `/orders/{id}` | Delete order |
+
+### Dashboard
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/dashboard` | Summary stats + low stock alerts |
+
+## Business Logic
+
+- **Unique SKU** — Product SKU/code is enforced unique at the database level
+- **Unique Email** — Customer email is enforced unique at the database level
+- **Stock Validation** — Orders are rejected if requested quantity exceeds available stock
+- **Auto Stock Deduction** — Placing an order automatically reduces product stock within a database transaction
+- **Auto Total Calculation** — Order total is computed server-side as `sum(quantity * unit_price)`
+- **Non-negative Stock** — Product quantity cannot be set below zero (Pydantic validation)
+- **Error Handling** — All endpoints return appropriate HTTP status codes (201, 400, 404, etc.)
+
+## Local Development
+
+### Prerequisites
+- Docker and Docker Compose
+
+### Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/Tejsvi-Bhat/inventory-management.git
+cd inventory-management
+
+# Copy environment variables
+cp .env.example .env
+
+# Start all services
+docker compose up --build
+```
+
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:8000 |
+| API Docs (Swagger) | http://localhost:8000/docs |
+| PostgreSQL | localhost:5432 |
+
+### Without Docker
+
+**Backend:**
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+pip install -r requirements.txt
+# Set DATABASE_URL to point to your PostgreSQL instance
+uvicorn app.main:app --reload
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## Docker
+
+### Images
+- **Backend:** `python:3.11-slim` → production server with uvicorn
+- **Frontend:** `node:20-slim` (build) → `nginx:alpine` (serve)
+- **Database:** `postgres:16-alpine`
+
+### Compose Services
+The `docker-compose.yml` defines three services:
+1. `db` — PostgreSQL with a named volume (`pgdata`) for persistence
+2. `backend` — FastAPI app, depends on healthy database
+3. `frontend` — Nginx serving the built React app
+
+All credentials are configured via environment variables (see `.env.example`).
+
+## Requirements Checklist
+
+### Tech Stack
+- [x] Python + FastAPI backend
+- [x] React (JavaScript) frontend
+- [x] PostgreSQL database
+- [x] Docker containerization
+- [x] Docker Compose orchestration
+- [x] Git version control
+
+### API Endpoints
+- [x] POST / GET / GET {id} / PUT / DELETE — Products
+- [x] POST / GET / GET {id} / DELETE — Customers
+- [x] POST / GET / GET {id} / DELETE — Orders
+
+### Business Logic
+- [x] Product SKU must be unique
+- [x] Customer email must be unique
+- [x] Product quantity cannot be negative
+- [x] Orders rejected if inventory is insufficient
+- [x] Order creation auto-reduces stock
+- [x] Order total auto-calculated by backend
+- [x] Proper error handling with HTTP status codes
+- [x] Request data validation (Pydantic)
+
+### Frontend Features
+- [x] Add / View / Update / Delete products
+- [x] Add / View / Delete customers
+- [x] Create / View / View details — Orders
+- [x] Dashboard with totals and low stock alerts
+- [x] Responsive design (desktop + mobile)
+- [x] Form validation
+- [x] Error and success messages
+
+### Docker
+- [x] Production-ready backend Dockerfile (slim base)
+- [x] Frontend Dockerfile (multi-stage, slim base)
+- [x] `.dockerignore` files
+- [x] `docker-compose.yml` with 3 services
+- [x] Environment variable configuration
+- [x] Named volume for PostgreSQL persistence
+- [x] No hardcoded credentials
+
+### Deployment
+- [x] GitHub repository
+- [x] Backend deployed on Render
+- [x] Frontend deployed on Vercel
+- [x] Docker Hub backend image
+- [x] Environment variables configured
+- [x] URLs publicly accessible
