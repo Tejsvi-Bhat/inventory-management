@@ -35,10 +35,10 @@ function Products() {
     try {
       if (editing) {
         await updateProduct(editing.id, payload);
-        setSuccess("Product updated");
+        setSuccess("Product updated successfully");
       } else {
         await createProduct(payload);
-        setSuccess("Product created");
+        setSuccess("Product created successfully");
       }
       resetForm();
       load();
@@ -73,45 +73,61 @@ function Products() {
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-        <h1 style={{ margin: 0 }}>Products</h1>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>Add Product</button>
+      <div className="page-header">
+        <div>
+          <h1>Products</h1>
+          <p className="page-subtitle">{products.length} items in inventory</p>
+        </div>
+        <button className="btn btn-primary" onClick={() => setShowModal(true)}>+ Add Product</button>
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
 
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>SKU</th>
-            <th>Price</th>
-            <th>Stock</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((p) => (
-            <tr key={p.id}>
-              <td>{p.name}</td>
-              <td>{p.sku}</td>
-              <td>${p.price.toFixed(2)}</td>
-              <td>
-                {p.quantity_in_stock}
-                {p.quantity_in_stock < 10 && <span className="badge-warning" style={{ marginLeft: 6 }}>Low</span>}
-              </td>
-              <td>
-                <button className="btn btn-secondary btn-sm" onClick={() => handleEdit(p)} style={{ marginRight: 4 }}>Edit</button>
-                <button className="btn btn-danger btn-sm" onClick={() => handleDelete(p.id)}>Delete</button>
-              </td>
+      <div className="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>SKU</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Actions</th>
             </tr>
-          ))}
-          {products.length === 0 && (
-            <tr><td colSpan="5" style={{ textAlign: "center", color: "#94a3b8" }}>No products yet</td></tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {products.map((p) => (
+              <tr key={p.id}>
+                <td style={{ fontWeight: 500 }}>{p.name}</td>
+                <td><code style={{ background: "#f1f5f9", padding: "0.15rem 0.4rem", borderRadius: 4, fontSize: "0.8rem" }}>{p.sku}</code></td>
+                <td>${p.price.toFixed(2)}</td>
+                <td>
+                  <div className="stock-cell">
+                    {p.quantity_in_stock}
+                    {p.quantity_in_stock < 10 && <span className="badge badge-warning">Low</span>}
+                  </div>
+                </td>
+                <td>
+                  <div className="actions-cell">
+                    <button className="btn btn-ghost btn-sm" onClick={() => handleEdit(p)}>Edit</button>
+                    <button className="btn btn-danger btn-sm" onClick={() => handleDelete(p.id)}>Delete</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+            {products.length === 0 && (
+              <tr>
+                <td colSpan="5">
+                  <div className="empty-state">
+                    <div className="empty-icon">📦</div>
+                    <p>No products yet. Add your first product to get started.</p>
+                  </div>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {showModal && (
         <div className="modal-overlay" onClick={resetForm}>
@@ -120,25 +136,25 @@ function Products() {
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>Product Name</label>
-                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. MacBook Pro 14&quot;" required />
               </div>
               <div className="form-group">
                 <label>SKU / Code</label>
-                <input value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} required />
+                <input value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} placeholder="e.g. MBP-14-M3" required />
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Price</label>
-                  <input type="number" step="0.01" min="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
+                  <label>Price ($)</label>
+                  <input type="number" step="0.01" min="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="0.00" required />
                 </div>
                 <div className="form-group">
                   <label>Quantity in Stock</label>
-                  <input type="number" min="0" value={form.quantity_in_stock} onChange={(e) => setForm({ ...form, quantity_in_stock: e.target.value })} required />
+                  <input type="number" min="0" value={form.quantity_in_stock} onChange={(e) => setForm({ ...form, quantity_in_stock: e.target.value })} placeholder="0" required />
                 </div>
               </div>
               <div className="modal-actions">
                 <button type="button" className="btn btn-secondary" onClick={resetForm}>Cancel</button>
-                <button type="submit" className="btn btn-primary">{editing ? "Update" : "Create"}</button>
+                <button type="submit" className="btn btn-primary">{editing ? "Save Changes" : "Add Product"}</button>
               </div>
             </form>
           </div>

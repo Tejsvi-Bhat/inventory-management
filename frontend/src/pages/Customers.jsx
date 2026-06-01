@@ -25,7 +25,7 @@ function Customers() {
     setError("");
     try {
       await createCustomer(form);
-      setSuccess("Customer created");
+      setSuccess("Customer created successfully");
       resetForm();
       load();
       setTimeout(() => setSuccess(""), 3000);
@@ -46,41 +46,71 @@ function Customers() {
     }
   };
 
+  const getInitials = (name) => {
+    return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+  };
+
+  const colors = ["#3b82f6", "#22c55e", "#a855f7", "#f97316", "#ec4899", "#06b6d4"];
+
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-        <h1 style={{ margin: 0 }}>Customers</h1>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>Add Customer</button>
+      <div className="page-header">
+        <div>
+          <h1>Customers</h1>
+          <p className="page-subtitle">{customers.length} registered customers</p>
+        </div>
+        <button className="btn btn-primary" onClick={() => setShowModal(true)}>+ Add Customer</button>
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
 
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {customers.map((c) => (
-            <tr key={c.id}>
-              <td>{c.full_name}</td>
-              <td>{c.email}</td>
-              <td>{c.phone}</td>
-              <td>
-                <button className="btn btn-danger btn-sm" onClick={() => handleDelete(c.id)}>Delete</button>
-              </td>
+      <div className="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Actions</th>
             </tr>
-          ))}
-          {customers.length === 0 && (
-            <tr><td colSpan="4" style={{ textAlign: "center", color: "#94a3b8" }}>No customers yet</td></tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {customers.map((c, i) => (
+              <tr key={c.id}>
+                <td>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: "50%",
+                      background: colors[i % colors.length],
+                      color: "white", display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: "0.7rem", fontWeight: 700, flexShrink: 0
+                    }}>
+                      {getInitials(c.full_name)}
+                    </div>
+                    <span style={{ fontWeight: 500 }}>{c.full_name}</span>
+                  </div>
+                </td>
+                <td>{c.email}</td>
+                <td>{c.phone}</td>
+                <td>
+                  <button className="btn btn-danger btn-sm" onClick={() => handleDelete(c.id)}>Delete</button>
+                </td>
+              </tr>
+            ))}
+            {customers.length === 0 && (
+              <tr>
+                <td colSpan="4">
+                  <div className="empty-state">
+                    <div className="empty-icon">👤</div>
+                    <p>No customers yet. Add your first customer to get started.</p>
+                  </div>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {showModal && (
         <div className="modal-overlay" onClick={resetForm}>
@@ -89,19 +119,19 @@ function Customers() {
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>Full Name</label>
-                <input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required />
+                <input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} placeholder="e.g. John Smith" required />
               </div>
               <div className="form-group">
                 <label>Email Address</label>
-                <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+                <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="e.g. john@example.com" required />
               </div>
               <div className="form-group">
                 <label>Phone Number</label>
-                <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required />
+                <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="e.g. +1 555-123-4567" required />
               </div>
               <div className="modal-actions">
                 <button type="button" className="btn btn-secondary" onClick={resetForm}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Create</button>
+                <button type="submit" className="btn btn-primary">Add Customer</button>
               </div>
             </form>
           </div>

@@ -10,26 +10,16 @@ function OrderDetails() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    getOrder(id)
-      .then((res) => {
-        setOrder(res.data);
-        return Promise.all([
-          getProducts(),
-          getCustomers(),
-        ]);
-      })
-      .then(([prodRes, custRes]) => {
+    Promise.all([getOrder(id), getProducts(), getCustomers()])
+      .then(([orderRes, prodRes, custRes]) => {
+        setOrder(orderRes.data);
+
         const prodMap = {};
         prodRes.data.forEach((p) => { prodMap[p.id] = p; });
         setProducts(prodMap);
 
-        const c = custRes.data.find((c) => c.id === order?.customer_id);
-        // order might not be set yet, we'll handle in render
-        setCustomer(null);
-        // re-derive after order is set
-        const custMap = {};
-        custRes.data.forEach((c) => { custMap[c.id] = c; });
-        setCustomer(custMap);
+        const c = custRes.data.find((c) => c.id === orderRes.data.customer_id);
+        setCustomer(c || null);
       })
       .catch(() => setError("Failed to load order details"));
   }, [id]);
@@ -37,41 +27,69 @@ function OrderDetails() {
   if (error) return <div className="alert alert-error">{error}</div>;
   if (!order) return <p>Loading...</p>;
 
-  const cust = customer?.[order.customer_id];
-
   return (
     <div>
-      <Link to="/orders" style={{ color: "#3b82f6", textDecoration: "none", fontSize: "0.9rem" }}>&larr; Back to Orders</Link>
-      <h1 style={{ marginTop: "0.75rem" }}>Order #{order.id}</h1>
+      <Link to="/orders" className="back-link">&larr; Back to Orders</Link>
 
-      <div className="card" style={{ marginBottom: "1.5rem" }}>
-        <p><strong>Customer:</strong> {cust ? cust.full_name : `#${order.customer_id}`}</p>
-        <p><strong>Email:</strong> {cust?.email || "N/A"}</p>
-        <p><strong>Date:</strong> {new Date(order.created_at).toLocaleString()}</p>
-        <p><strong>Total:</strong> ${order.total_amount.toFixed(2)}</p>
+      <div className="page-header">
+        <div>
+          <h1>Order #{order.id}</h1>
+          <p className="page-subtitle">Placed on {new Date(order.created_at).toLocaleString()}</p>
+        </div>
+        <div style={{ textAlign: "right" }}>
+          <div style={{ fontSize: "0.75rem", fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em" }}>Total Amount</div>
+          <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#0f172a" }}>${order.total_amount.toFixed(2)}</div>
+        </div>
       </div>
 
-      <h2 style={{ fontSize: "1.1rem", marginBottom: "0.75rem" }}>Items</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th>Quantity</th>
-            <th>Unit Price</th>
-            <th>Subtotal</th>
-          </tr>
-        </thead>
-        <tbody>
-          {order.items.map((item) => (
-            <tr key={item.id}>
-              <td>{products[item.product_id]?.name || `Product #${item.product_id}`}</td>
-              <td>{item.quantity}</td>
-              <td>${item.unit_price.toFixed(2)}</td>
-              <td>${(item.quantity * item.unit_price).toFixed(2)}</td>
+      <div className="card" style={{ marginBottom: "1.5rem" }}>
+        <div className="detail-grid">
+          <div className="detail-item">
+            <label>Customer</label>
+            <span>{customer ? customer.full_name : `#${order.customer_id}`}</span>
+          </div>
+          <div className="detail-item">
+            <label>Email</label>
+            <span>{customer?.email || "N/A"}</span>
+          </div>
+          <div className="detail-item">
+            <label>Phone</label>
+            <span>{customer?.phone || "N/A"}</span>
+          </div>
+          <div className="detail-item">
+            <label>Order Date</label>
+            <span>{new Date(order.created_at).toLocaleDateString()}</span>
+          </div>
+        </div>
+      </div>
+
+      <h2 className="section-title">Order Items</h2>
+      <div className="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Quantity</th>
+              <th>Unit Price</th>
+              <th>Subtotal</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {order.items.map((item) => (
+              <tr key={item.id}>
+                <td style={{ fontWeight: 500 }}>{products[item.product_id]?.name || `Product #${item.product_id}`}</td>
+                <td>{item.quantity}</td>
+                <td>${item.unit_price.toFixed(2)}</td>
+                <td style={{ fontWeight: 600 }}>${(item.quantity * item.unit_price).toFixed(2)}</td>
+              </tr>
+            ))}
+            <tr style={{ background: "#f8fafc" }}>
+              <td colSpan="3" style={{ textAlign: "right", fontWeight: 600, color: "#64748b" }}>Total</td>
+              <td style={{ fontWeight: 700, fontSize: "1rem" }}>${order.total_amount.toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
